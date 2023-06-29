@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/robfig/cron/v3"
 	"github.com/tatsster/albion_killboard/config"
@@ -51,6 +52,7 @@ func UpdateKillDeath() {
 	var (
 		// discordBot = config.SingletonModel.GetDiscord()
 		sqlite = config.SingletonModel.GetDatabase()
+		wg     sync.WaitGroup
 	)
 
 	// Get members
@@ -61,7 +63,10 @@ func UpdateKillDeath() {
 
 	for _, mem := range members {
 		// Each member is 1 goroutine
-		go func(mem config.Member) {
+		wg.Add(1)
+		go func(mem config.Member, wg *sync.WaitGroup) {
+			defer wg.Done()
+
 			// Fetch data
 			kills, err := api.GetKills(mem.ID)
 			if err != nil {
@@ -89,7 +94,8 @@ func UpdateKillDeath() {
 			}
 
 			// Update last kill/death time
-		}(mem)
+		}(mem, &wg)
 	}
 
+	wg.Wait()
 }
