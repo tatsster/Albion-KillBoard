@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/joho/godotenv"
 	"github.com/robfig/cron/v3"
 	"github.com/tatsster/albion_killboard/config"
 	"github.com/tatsster/albion_killboard/internal/pkg/api"
@@ -15,10 +17,16 @@ import (
 )
 
 func main() {
-	discordBot, err := discordgo.New("Bot " + config.BotToken)
+	err := godotenv.Load()
 	if err != nil {
-		fmt.Println("Error creating Discord session: ", err)
-		return
+		log.Fatal("Error loading .env file")
+	}
+
+	BotToken := os.Getenv("TOKEN")
+
+	discordBot, err := discordgo.New("Bot " + BotToken)
+	if err != nil {
+		log.Fatal("Error creating Discord session: ", err)
 	}
 
 	// Register a message handler
@@ -27,8 +35,7 @@ func main() {
 	// Open connection to discord
 	err = discordBot.Open()
 	if err != nil {
-		fmt.Println("Error opening connection: ", err)
-		return
+		log.Fatal("Error opening connection: ", err)
 	}
 
 	c := cron.New()
@@ -52,8 +59,7 @@ func main() {
 	})
 
 	if err != nil {
-		fmt.Println("Error scheduling cronjob: ", err)
-		return
+		log.Fatal("Error scheduling cronjob: ", err)
 	}
 
 	c.Start()
