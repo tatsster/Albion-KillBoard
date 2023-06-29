@@ -50,7 +50,7 @@ func UpdateMember() {
 func UpdateKillDeath() {
 	var (
 		// discordBot = config.SingletonModel.GetDiscord()
-		sqlite     = config.SingletonModel.GetDatabase()
+		sqlite = config.SingletonModel.GetDatabase()
 	)
 
 	// Get members
@@ -60,33 +60,36 @@ func UpdateKillDeath() {
 	}
 
 	for _, mem := range members {
-		// Fetch data
-		kills, err := api.GetKills(mem.ID)
-		if err != nil {
-			fmt.Println("Error in get kill: ", err)
-			return
-		}
-		deaths, err := api.GetDeaths(mem.ID)
-		if err != nil {
-			fmt.Println("Error in get death: ", err)
-			return
-		}
+		// Each member is 1 goroutine
+		go func(mem config.Member) {
+			// Fetch data
+			kills, err := api.GetKills(mem.ID)
+			if err != nil {
+				fmt.Println("Error in get kill: ", err)
+				return
+			}
+			deaths, err := api.GetDeaths(mem.ID)
+			if err != nil {
+				fmt.Println("Error in get death: ", err)
+				return
+			}
 
-		// Send result as embed to discord
-		// _, err := discordBot.ChannelMessageSendEmbed(config.ChannelID, data)
-		for _, kill := range kills {
-			// Pre process data - Image handling
-			// _, _ = discordBot.ChannelMessageSend(config.ChannelID, kill.Killer.Name)
-			fmt.Println(kill.Killer.Name)
-		}
+			// Send result as embed to discord
+			// _, err := discordBot.ChannelMessageSendEmbed(config.ChannelID, data)
+			for _, kill := range kills {
+				// Pre process data - Image handling
+				// _, _ = discordBot.ChannelMessageSend(config.ChannelID, kill.Killer.Name)
+				fmt.Println(kill.Killer.Name)
+			}
 
-		for _, death := range deaths {
-			// Pre process data - Image handling
-			// _, _ = discordBot.ChannelMessageSend(config.ChannelID, death.Killer.Name)
-			fmt.Println(death.Killer.Name)
-		}
+			for _, death := range deaths {
+				// Pre process data - Image handling
+				// _, _ = discordBot.ChannelMessageSend(config.ChannelID, death.Killer.Name)
+				fmt.Println(death.Killer.Name)
+			}
 
-		// Update last kill/death time
+			// Update last kill/death time
+		}(mem)
 	}
 
 }
