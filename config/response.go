@@ -1,4 +1,4 @@
-package api
+package config
 
 import "time"
 
@@ -527,4 +527,92 @@ type KillDeathResponse []struct {
 	KillArea string `json:"KillArea,omitempty"`
 	Category any    `json:"Category,omitempty"`
 	Type     string `json:"Type,omitempty"`
+}
+
+type MemberInfo []struct {
+	AverageItemPower float64 `json:"AverageItemPower,omitempty"`
+	Equipment        struct {
+		MainHand any `json:"MainHand,omitempty"`
+		OffHand  any `json:"OffHand,omitempty"`
+		Head     any `json:"Head,omitempty"`
+		Armor    any `json:"Armor,omitempty"`
+		Shoes    any `json:"Shoes,omitempty"`
+		Bag      any `json:"Bag,omitempty"`
+		Cape     any `json:"Cape,omitempty"`
+		Mount    any `json:"Mount,omitempty"`
+		Potion   any `json:"Potion,omitempty"`
+		Food     any `json:"Food,omitempty"`
+	} `json:"Equipment,omitempty"`
+	Inventory          []any   `json:"Inventory,omitempty"`
+	Name               string  `json:"Name,omitempty"`
+	ID                 string  `json:"Id,omitempty"`
+	GuildName          string  `json:"GuildName,omitempty"`
+	GuildID            string  `json:"GuildId,omitempty"`
+	AllianceName       any     `json:"AllianceName,omitempty"`
+	AllianceID         string  `json:"AllianceId,omitempty"`
+	AllianceTag        any     `json:"AllianceTag,omitempty"`
+	Avatar             string  `json:"Avatar,omitempty"`
+	AvatarRing         string  `json:"AvatarRing,omitempty"`
+	DeathFame          int     `json:"DeathFame,omitempty"`
+	KillFame           int     `json:"KillFame,omitempty"`
+	FameRatio          float64 `json:"FameRatio,omitempty"`
+	LifetimeStatistics struct {
+		PvE struct {
+			Total            int `json:"Total,omitempty"`
+			Royal            int `json:"Royal,omitempty"`
+			Outlands         int `json:"Outlands,omitempty"`
+			Avalon           int `json:"Avalon,omitempty"`
+			Hellgate         int `json:"Hellgate,omitempty"`
+			CorruptedDungeon int `json:"CorruptedDungeon,omitempty"`
+			Mists            int `json:"Mists,omitempty"`
+		} `json:"PvE,omitempty"`
+		Gathering struct {
+			Fiber struct {
+				Total    int `json:"Total,omitempty"`
+				Royal    int `json:"Royal,omitempty"`
+				Outlands int `json:"Outlands,omitempty"`
+				Avalon   int `json:"Avalon,omitempty"`
+			} `json:"Fiber,omitempty"`
+			Hide struct {
+				Total    int `json:"Total,omitempty"`
+				Royal    int `json:"Royal,omitempty"`
+				Outlands int `json:"Outlands,omitempty"`
+				Avalon   int `json:"Avalon,omitempty"`
+			} `json:"Hide,omitempty"`
+			Ore struct {
+				Total    int `json:"Total,omitempty"`
+				Royal    int `json:"Royal,omitempty"`
+				Outlands int `json:"Outlands,omitempty"`
+				Avalon   int `json:"Avalon,omitempty"`
+			} `json:"Ore,omitempty"`
+			Rock struct {
+				Total    int `json:"Total,omitempty"`
+				Royal    int `json:"Royal,omitempty"`
+				Outlands int `json:"Outlands,omitempty"`
+				Avalon   int `json:"Avalon,omitempty"`
+			} `json:"Rock,omitempty"`
+			Wood struct {
+				Total    int `json:"Total,omitempty"`
+				Royal    int `json:"Royal,omitempty"`
+				Outlands int `json:"Outlands,omitempty"`
+				Avalon   int `json:"Avalon,omitempty"`
+			} `json:"Wood,omitempty"`
+			All struct {
+				Total    int `json:"Total,omitempty"`
+				Royal    int `json:"Royal,omitempty"`
+				Outlands int `json:"Outlands,omitempty"`
+				Avalon   int `json:"Avalon,omitempty"`
+			} `json:"All,omitempty"`
+		} `json:"Gathering,omitempty"`
+		Crafting struct {
+			Total    int `json:"Total,omitempty"`
+			Royal    int `json:"Royal,omitempty"`
+			Outlands int `json:"Outlands,omitempty"`
+			Avalon   int `json:"Avalon,omitempty"`
+		} `json:"Crafting,omitempty"`
+		CrystalLeague int       `json:"CrystalLeague,omitempty"`
+		FishingFame   int       `json:"FishingFame,omitempty"`
+		FarmingFame   int       `json:"FarmingFame,omitempty"`
+		Timestamp     time.Time `json:"Timestamp,omitempty"`
+	} `json:"LifetimeStatistics,omitempty"`
 }

@@ -7,43 +7,23 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/tatsster/albion_killboard/config"
+	"github.com/tatsster/albion_killboard/internal/pkg/util"
 )
 
-type RequestAPI struct {
-	BaseURL string
-	query   url.Values
-}
-
-func CreateAPI(request RequestAPI) string {
-	var queryString string
-	if len(request.query) > 0 {
-		queryString = fmt.Sprintf("?%s", request.query.Encode())
-	}
-
-	url := strings.TrimLeft(request.BaseURL, "/")
-	return fmt.Sprintf("%s%s", url, queryString)
-}
-
-// GetKillDeath should return list of struct (kill death info) to construct image
-func GetKillDeath() (string, error) {
-	var (
-		request = RequestAPI{
-			BaseURL: config.ALBION_API,
-			query: url.Values{
-				"limit":   []string{"51"},
-				"offset":  []string{"0"},
-				"guildId": []string{config.GuildID},
-			},
-		}
+func GetMembers() (config.MemberInfo, error) {
+	res, err := http.Get(util.BaseURl(config.ALBION_API).BuildURL(
+		"/guilds/:guild_id/members",
+		map[string]string{
+			"guild_id": config.GuildID,
+		},
+		url.Values{}),
 	)
 
-	res, err := http.Get(CreateAPI(request))
 	if err != nil {
-		fmt.Println("Error in get kill death from API: ", err)
-		return "", err
+		fmt.Println("Error in get guild members from API: ", err)
+		return nil, err
 	}
 
 	// After return, clean up
@@ -54,23 +34,81 @@ func GetKillDeath() (string, error) {
 
 	if res.StatusCode != http.StatusOK {
 		fmt.Println("Status is not OK")
-		return "", errors.New("status not OK")
+		return nil, errors.New("status not OK")
 	}
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println("Error in reading response body: ", err)
-		return "", err
+		return nil, err
 	}
 
-	var response KillDeathResponse
+	var response config.MemberInfo
 	err = json.Unmarshal(data, &response)
 	if err != nil {
 		fmt.Println("Error in JSON unmarshal: ", err)
-		return "", err
+		return nil, err
+	}
+	return response, nil
+}
+
+func GetKills(playerID string) (config.KillDeathResponse, error) {
+	url := util.BaseURl(config.ALBION_API).BuildURL(
+		"/players/:player_id/kills",
+		map[string]string{
+			"player_id": playerID,
+		},
+		url.Values{})
+
+	response, err := GetKillDeath(url)
+	if err != nil {
+		fmt.Println("Error in get kill: ", err)
+	}
+	return response, err
+}
+
+func GetDeaths(playerID string) (config.KillDeathResponse, error) {
+	url := util.BaseURl(config.ALBION_API).BuildURL(
+		"/players/:player_id/deaths",
+		map[string]string{
+			"player_id": playerID,
+		},
+		url.Values{})
+
+	response, err := GetKillDeath(url)
+	if err != nil {
+		fmt.Println("Error in get death: ", err)
+	}
+	return response, err
+}
+
+func GetKillDeath(url string) (config.KillDeathResponse, error) {
+	res, err := http.Get(url)
+
+	if err != nil {
+		return nil, err
 	}
 
-	for _, kill := range response {
-		fmt.Printf("Killer: %s - Guild: %s\n", kill.Killer.Name, kill.Killer.GuildName)
+	// After return, clean up
+	defer func() {
+		_, _ = io.Copy(io.Discard, res.Body)
+		_ = res.Body.Close()
+	}()
+
+	if res.StatusCode != http.StatusOK {
+		fmt.Println("Status is not OK")
+		return nil, errors.New("status not OK")
 	}
-	return response[0].Killer.Name, nil
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("Error in reading response body: ", err)
+		return nil, err
+	}
+
+	var response config.KillDeathResponse
+	err = json.Unmarshal(data, &response)
+	if err != nil {
+		fmt.Println("Error in JSON unmarshal: ", err)
+		return nil, err
+	}
+	return response, nil
 }

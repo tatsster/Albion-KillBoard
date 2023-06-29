@@ -8,12 +8,10 @@ import (
 	"syscall"
 
 	"github.com/joho/godotenv"
-	"github.com/robfig/cron/v3"
 	"github.com/tatsster/albion_killboard/config"
-	"github.com/tatsster/albion_killboard/internal/pkg/api"
+	"github.com/tatsster/albion_killboard/internal/pkg/app"
+	"github.com/tatsster/albion_killboard/internal/pkg/db"
 	"github.com/tatsster/albion_killboard/internal/pkg/discord"
-
-	"github.com/bwmarrin/discordgo"
 )
 
 func main() {
@@ -22,47 +20,25 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	BotToken := os.Getenv("TOKEN")
-
-	discordBot, err := discordgo.New("Bot " + BotToken)
+	discordBot, err := discord.NewDiscordBot()
 	if err != nil {
-		log.Fatal("Error creating Discord session: ", err)
+		return
 	}
 
-	// Register a message handler
-	discordBot.AddHandler(discord.MessangeHandler)
-
-	// Open connection to discord
-	err = discordBot.Open()
+	cron, err := app.NewCronScheduler()
 	if err != nil {
-		log.Fatal("Error opening connection: ", err)
+		return
 	}
 
-	c := cron.New()
-	_, err = c.AddFunc(config.CronSchedule, func() {
-		// Fetch data
-		data, err := api.GetKillDeath()
-		if err != nil {
-			fmt.Println("Error in get kill death: ", err)
-			return
-		}
-
-		// Pre process data - Image handling
-
-		// Send result as embed to discord
-		// _, err := discordBot.ChannelMessageSendEmbed(config.ChannelID, data)
-		_, err = discordBot.ChannelMessageSend(config.ChannelID, data)
-		if err != nil {
-			fmt.Println("Error sending message:", err)
-			return
-		}
-	})
-
+	db, err := db.NewSqliteHandler()
 	if err != nil {
-		log.Fatal("Error scheduling cronjob: ", err)
+		return
 	}
 
-	c.Start()
+	config.SingletonModel.WithDiscord(discordBot).WithScheduler(cron).WithDB(db)
+
+	app.UpdateMember()
+	config.SingletonModel.GetScheduler().Start()
 
 	// Wait until the bot is stopped
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
@@ -70,9 +46,5 @@ func main() {
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
 
-	// Stop the cron job
-	c.Stop()
-
-	// Close the Discord session
-	discordBot.Close()
+	config.SingletonModel.Shutdown()
 }

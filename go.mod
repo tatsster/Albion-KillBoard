@@ -2,9 +2,11 @@ module github.com/tatsster/albion_killboard
 
 go 1.19
 
-require github.com/bwmarrin/discordgo v0.27.1
-
-require github.com/joho/godotenv v1.5.1 // indirect
+require (
+	github.com/bwmarrin/discordgo v0.27.1
+	github.com/joho/godotenv v1.5.1
+	github.com/mattn/go-sqlite3 v1.14.17
+)
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect
