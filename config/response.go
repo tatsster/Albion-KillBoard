@@ -2,7 +2,9 @@ package config
 
 import "time"
 
-type KillDeathResponse []struct {
+type KillDeathResponse []Event
+
+type Event struct {
 	GroupMemberCount     int       `json:"groupMemberCount,omitempty"`
 	NumberOfParticipants int       `json:"numberOfParticipants,omitempty"`
 	EventID              int       `json:"EventId,omitempty"`
@@ -18,8 +20,14 @@ type KillDeathResponse []struct {
 				ActiveSpells  []any  `json:"ActiveSpells,omitempty"`
 				PassiveSpells []any  `json:"PassiveSpells,omitempty"`
 			} `json:"MainHand,omitempty"`
-			OffHand any `json:"OffHand,omitempty"`
-			Head    struct {
+			OffHand struct {
+				Type          string `json:"Type,omitempty"`
+				Count         int    `json:"Count,omitempty"`
+				Quality       int    `json:"Quality,omitempty"`
+				ActiveSpells  []any  `json:"ActiveSpells,omitempty"`
+				PassiveSpells []any  `json:"PassiveSpells,omitempty"`
+			} `json:"OffHand,omitempty"`
+			Head struct {
 				Type          string `json:"Type,omitempty"`
 				Count         int    `json:"Count,omitempty"`
 				Quality       int    `json:"Quality,omitempty"`
@@ -208,8 +216,20 @@ type KillDeathResponse []struct {
 				ActiveSpells  []any  `json:"ActiveSpells,omitempty"`
 				PassiveSpells []any  `json:"PassiveSpells,omitempty"`
 			} `json:"Mount,omitempty"`
-			Potion any `json:"Potion,omitempty"`
-			Food   any `json:"Food,omitempty"`
+			Potion struct {
+				Type          string `json:"Type,omitempty"`
+				Count         int    `json:"Count,omitempty"`
+				Quality       int    `json:"Quality,omitempty"`
+				ActiveSpells  []any  `json:"ActiveSpells,omitempty"`
+				PassiveSpells []any  `json:"PassiveSpells,omitempty"`
+			} `json:"Potion,omitempty"`
+			Food struct {
+				Type          string `json:"Type,omitempty"`
+				Count         int    `json:"Count,omitempty"`
+				Quality       int    `json:"Quality,omitempty"`
+				ActiveSpells  []any  `json:"ActiveSpells,omitempty"`
+				PassiveSpells []any  `json:"PassiveSpells,omitempty"`
+			} `json:"Food,omitempty"`
 		} `json:"Equipment,omitempty"`
 		Inventory          []any   `json:"Inventory,omitempty"`
 		Name               string  `json:"Name,omitempty"`

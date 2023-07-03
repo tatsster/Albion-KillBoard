@@ -22,3 +22,6 @@ go.work
 
 # Custom
 .env
+
+assets/items/
+assets/image/

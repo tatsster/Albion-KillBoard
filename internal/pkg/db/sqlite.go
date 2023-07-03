@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/tatsster/albion_killboard/config"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/tatsster/albion_killboard/config"
 )
 
 func NewSqliteHandler() (*sql.DB, error) {
