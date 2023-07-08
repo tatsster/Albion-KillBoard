@@ -87,7 +87,7 @@ func InitImage(startId int) (int, error) {
 			continue
 		}
 		array[1] = strings.TrimSpace(array[1])
-		if (stt < 1642) || (stt > 8481) && err == nil {
+		if (stt < 1642 || stt > 8481) && err == nil {
 			_, err = api.SaveImage(array[1], 0)
 		} else {
 			for i := 1; i <= 5; i++ {

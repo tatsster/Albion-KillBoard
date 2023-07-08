@@ -1,13 +1,15 @@
 package util
 
-import "strconv"
+import (
+	"strconv"
+	"time"
+)
 
 func If[T any](cond bool, vtrue, vfalse T) T {
 	if cond {
 		return vtrue
 	}
 	return vfalse
-
 }
 
 func FormatInt(number int) string {
@@ -21,4 +23,8 @@ func FormatInt(number int) string {
 		output = output[:outputIndex] + "." + output[outputIndex:]
 	}
 	return output
+}
+
+func TruncateTime(timeStamp *time.Time) {
+	*timeStamp = timeStamp.Truncate(time.Second)
 }

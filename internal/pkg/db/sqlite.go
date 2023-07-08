@@ -85,3 +85,45 @@ func GetMembers(db *sql.DB) ([]config.Member, error) {
 
 	return members, rows.Err()
 }
+
+func UpdateKillTime(db *sql.DB, kill config.Event) error {
+	sql := "UPDATE members SET last_kill = ? WHERE id = ?"
+
+	tx, err := db.Begin()
+	if err != nil {
+		return fmt.Errorf("start transaction error: %v", err)
+	}
+
+	updateKill, err := tx.Prepare(sql)
+	if err != nil {
+		return fmt.Errorf("prepare statement error: %v", err)
+	}
+
+	_, err = updateKill.Exec(kill.TimeStamp, kill.Killer.ID)
+	if err != nil {
+		return fmt.Errorf("execute sql error: %v", err)
+	}
+	updateKill.Close()
+	return tx.Commit()
+}
+
+func UpdatDeathTime(db *sql.DB, death config.Event) error {
+	sql := "UPDATE members SET last_death = ? WHERE id = ?"
+
+	tx, err := db.Begin()
+	if err != nil {
+		return fmt.Errorf("start transaction error: %v", err)
+	}
+
+	updateKill, err := tx.Prepare(sql)
+	if err != nil {
+		return fmt.Errorf("prepare statement error: %v", err)
+	}
+
+	_, err = updateKill.Exec(death.TimeStamp, death.Victim.ID)
+	if err != nil {
+		return fmt.Errorf("execute sql error: %v", err)
+	}
+	updateKill.Close()
+	return tx.Commit()
+}

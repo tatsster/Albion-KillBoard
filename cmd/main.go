@@ -20,6 +20,28 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	// Check if the folder assets
+	if _, err := os.Stat(config.ASSET_DIR); os.IsNotExist(err) {
+		// Folder does not exist, create it
+		err := os.MkdirAll(config.ASSET_DIR, 0755) // 0755 sets the folder permissions
+		if err != nil {
+			fmt.Printf("Error creating folder: %s\n", err)
+			return
+		}
+		fmt.Printf("Folder created: %s\n", config.ASSET_DIR)
+	}
+
+	// Check if the folder result
+	if _, err := os.Stat(config.RESULT_DIR); os.IsNotExist(err) {
+		// Folder does not exist, create it
+		err := os.MkdirAll(config.RESULT_DIR, 0755) // 0755 sets the folder permissions
+		if err != nil {
+			fmt.Printf("Error creating folder: %s\n", err)
+			return
+		}
+		fmt.Printf("Folder created: %s\n", config.RESULT_DIR)
+	}
+
 	discordBot, err := discord.NewDiscordBot()
 	if err != nil {
 		return
@@ -38,6 +60,7 @@ func main() {
 	config.SingletonModel.WithDiscord(discordBot).WithScheduler(cron).WithDB(db)
 
 	app.UpdateMember()
+	app.FirstUpdate()
 	config.SingletonModel.GetScheduler().Start()
 
 	// Wait until the bot is stopped

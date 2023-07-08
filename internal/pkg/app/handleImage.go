@@ -121,10 +121,23 @@ func InsertItemImage(item struct {
 }
 
 func HandleImage(event config.Event) (string, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			// Handle the panic gracefully
+			fmt.Println("Panic occurred: ", r)
+			fmt.Println(event.TotalVictimKillFame)
+			fmt.Println(event.Killer.Name)
+			fmt.Println(event.Victim.Name)
+			fmt.Println(event.Killer.GuildName)
+			fmt.Println(event.Victim.GuildName)
+		}
+	}()
+
 	r := image.Rectangle{image.Point{0, 0}, bounds[0].Max}
 	rgba := image.NewRGBA(r)
 
 	draw.Draw(rgba, bounds[0], background, image.Point{0, 0}, draw.Src)
+	// Killer equipment
 	InsertItemImage(event.Killer.Equipment.MainHand, bounds[1], rgba)
 	InsertItemImage(event.Killer.Equipment.OffHand, bounds[2], rgba)
 	InsertItemImage(event.Killer.Equipment.Bag, bounds[3], rgba)
@@ -135,6 +148,7 @@ func HandleImage(event config.Event) (string, error) {
 	InsertItemImage(event.Killer.Equipment.Armor, bounds[8], rgba)
 	InsertItemImage(event.Killer.Equipment.Shoes, bounds[9], rgba)
 	InsertItemImage(event.Killer.Equipment.Mount, bounds[10], rgba)
+	// Victim equipment
 	InsertItemImage(event.Victim.Equipment.MainHand, bounds[11], rgba)
 	InsertItemImage(event.Victim.Equipment.OffHand, bounds[12], rgba)
 	InsertItemImage(event.Victim.Equipment.Bag, bounds[13], rgba)
@@ -166,7 +180,11 @@ func HandleImage(event config.Event) (string, error) {
 
 	// dc.SetFontFace(fontNormal)
 	// dc.SetRGB(0.75, 0.75, 0.75)
-	dc.DrawStringAnchored(fmt.Sprintf("%d x %s", event.NumberOfParticipants, util.FormatInt(int(event.TotalVictimKillFame/event.NumberOfParticipants))), 1250/2, 320, 0.5, 0.5)
+	if event.NumberOfParticipants == 0 {
+		event.NumberOfParticipants = 1
+	}
+	splitKillFame := fmt.Sprintf("%d x %s", event.NumberOfParticipants, util.FormatInt(int(event.TotalVictimKillFame/event.NumberOfParticipants)))
+	dc.DrawStringAnchored(splitKillFame, 1250/2, 320, 0.5, 0.5)
 	dc.SetFontFace(fontBold)
 	dc.SetRGB(1, 1, 1)
 	dc.DrawStringAnchored(strconv.Itoa(int(event.Killer.AverageItemPower)), 1250/2-55, 400, 0.5, 0.5)

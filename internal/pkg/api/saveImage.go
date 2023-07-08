@@ -48,7 +48,7 @@ func SaveImage(itemId string, quality int) (bool, error) {
 
 	file, err := os.Create(fmt.Sprintf("assets/items/%s_%d.png", itemId, quality))
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return false, errors.New("can't create file")
 	}
 	defer file.Close()
