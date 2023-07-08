@@ -25,3 +25,5 @@ go.work
 
 assets/items/
 assets/image/
+
+/out/

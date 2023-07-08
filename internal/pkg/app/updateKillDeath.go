@@ -148,7 +148,7 @@ func UpdateKillDeath() {
 			memberCh <- member
 			return nil
 		})
-		time.Sleep(time.Second)
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	wg.Wait()

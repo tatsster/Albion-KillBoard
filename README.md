@@ -1,6 +1,11 @@
 # Albion-KillBoard
 Albion East Kill Death bot
 
+## TO DO
+- Upload items image on public host
+- Script to download as zip and extract
+- Dockerize
+
 ## Dev Document
 - Database:
     - Member ID, Name, Last time death, Last time kill
