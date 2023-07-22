@@ -8,7 +8,7 @@ COPY . .
 
 # Build the Go application
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ./out/albion_killboard ./cmd/main.go
+RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o ./out/albion_killboard ./cmd/main.go
 
 # Define the command to run your Go application
 CMD ["./out/albion_killboard"]
