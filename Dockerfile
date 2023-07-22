@@ -10,17 +10,5 @@ COPY . .
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ./out/albion_killboard ./cmd/main.go
 
-# Create a new lightweight image for deployment
-FROM alpine:latest
-
-# Set the working directory inside the container
-WORKDIR /app
-
-# Copy the built Go binary from the build image
-COPY --from=build /app/albion_killboard .
-
-# Expose the port your Go application listens on
-EXPOSE 8080
-
 # Define the command to run your Go application
-CMD ["./albion_killboard"]
+CMD ["./out/albion_killboard"]
