@@ -7,6 +7,8 @@ container_id=$(docker ps --filter "ancestor=albion_killboard" --format "{{.ID}}"
 docker cp $container_id:/app/sql/killboard.db ./sql/killboard.db
 
 # Build Dockerfile
+docker build --no-cache -t albion_killboard .
+
 docker run -d -v $(pwd)/sql/killboard.db:/app/sql/killboard.db albion_killboard
 
 # Clear all 
