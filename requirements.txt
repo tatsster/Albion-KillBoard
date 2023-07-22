@@ -10,7 +10,7 @@ jsonpointer==2.1
 packaging==23.0
 pip==23.0.1
 pluggy==1.0.0
-pycosat==0.6.4
+pycosat==0.6.3
 pycparser==2.21
 pyOpenSSL==23.0.0
 PySocks==1.7.1
