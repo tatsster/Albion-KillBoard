@@ -8,7 +8,7 @@ COPY . .
 
 # Build the Go application
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -o albion_killboard .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ./out/albion_killboard ./cmd/main.go
 
 # Create a new lightweight image for deployment
 FROM alpine:latest
