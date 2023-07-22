@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -27,4 +28,11 @@ func FormatInt(number int) string {
 
 func TruncateTime(timeStamp *time.Time) {
 	*timeStamp = timeStamp.Truncate(time.Second)
+}
+
+func GetGuildAndTag(guildName string, allyTag string) string {
+	if allyTag != "" {
+		return fmt.Sprintf("[%s] %s", allyTag, guildName)
+	}
+	return guildName
 }

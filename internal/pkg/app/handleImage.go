@@ -34,11 +34,11 @@ func init() {
 	}
 
 	// font, err := truetype.Parse(goregular.TTF)
-	fontBold, err = gg.LoadFontFace("assets/fonts/Raleway-Bold.ttf", 28)
+	fontBold, err = gg.LoadFontFace("assets/fonts/Helvetica-Bold.ttf", 28)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fontNormal, err = gg.LoadFontFace("assets/fonts/Raleway-Regular.ttf", 28)
+	fontNormal, err = gg.LoadFontFace("assets/fonts/Helvetica.ttf", 28)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -165,9 +165,6 @@ func HandleImage(event config.Event) (string, error) {
 	// dc.Clear()
 	dc.SetRGB(0, 0, 0)
 
-	// if err := dc.LoadFontFace("assets/fonts/Raleway-Regular.ttf", 32); err != nil {
-	// 	panic(err)
-	// }
 	dc.SetFontFace(fontBold)
 	dc.DrawStringAnchored(util.FormatInt(event.TotalVictimKillFame), 1250/2, 290, 0.5, 0.5)
 
@@ -175,8 +172,9 @@ func HandleImage(event config.Event) (string, error) {
 	dc.DrawStringAnchored(event.Victim.Name, 985, 60, 0.5, 0.5)
 
 	dc.SetFontFace(fontNormal)
-	dc.DrawStringAnchored(event.Killer.GuildName, 260, 95, 0.5, 0.5)
-	dc.DrawStringAnchored(event.Victim.GuildName, 985, 95, 0.5, 0.5)
+
+	dc.DrawStringAnchored(util.GetGuildAndTag(event.Killer.GuildName, event.Killer.AllianceName), 260, 95, 0.5, 0.5)
+	dc.DrawStringAnchored(util.GetGuildAndTag(event.Victim.GuildName, event.Victim.AllianceName), 985, 95, 0.5, 0.5)
 
 	// dc.SetFontFace(fontNormal)
 	// dc.SetRGB(0.75, 0.75, 0.75)
@@ -185,10 +183,17 @@ func HandleImage(event config.Event) (string, error) {
 	}
 	splitKillFame := fmt.Sprintf("%d x %s", event.NumberOfParticipants, util.FormatInt(int(event.TotalVictimKillFame/event.NumberOfParticipants)))
 	dc.DrawStringAnchored(splitKillFame, 1250/2, 320, 0.5, 0.5)
+
 	dc.SetFontFace(fontBold)
+
 	dc.SetRGB(1, 1, 1)
-	dc.DrawStringAnchored(strconv.Itoa(int(event.Killer.AverageItemPower)), 1250/2-55, 400, 0.5, 0.5)
-	dc.DrawStringAnchored(strconv.Itoa(int(event.Victim.AverageItemPower)), 1250/2+55, 400, 0.5, 0.5)
+	dc.DrawStringAnchored(strconv.Itoa(int(event.Killer.AverageItemPower)), 1250/2-56, 402, 0.5, 0.5)
+	dc.DrawStringAnchored(strconv.Itoa(int(event.Victim.AverageItemPower)), 1250/2+54, 402, 0.5, 0.5)
+
+	dc.SetRGB(0.25, 0.25, 0.25)
+	timeString := event.TimeStamp.Format("15:04 2006-01-02")
+	dc.DrawStringAnchored(timeString, 1250/2, 500, 0.5, 0.5)
+	// fmt.Println(event.Victim.Inventory)
 
 	imgPath := fmt.Sprintf("assets/image/%d.png", event.EventID)
 	err := dc.SavePNG(imgPath)
