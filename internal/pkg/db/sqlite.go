@@ -62,28 +62,51 @@ func UpdateMembers(db *sql.DB, members config.MemberInfo) error {
 	return nil
 }
 
-func GetMembers(db *sql.DB) ([]config.Member, error) {
+func GetAllMemberID(db *sql.DB) ([]string, error) {
 	var (
-		members = make([]config.Member, 0)
+		memberIDs = make([]string, 0)
 	)
 
-	rows, err := db.Query("SELECT * FROM members")
+	rows, err := db.Query("SELECT id FROM members ORDER BY id")
 	if err != nil {
-		return members, err
+		return memberIDs, err
 	}
 
 	defer rows.Close()
 
 	for rows.Next() {
-		var member config.Member
-		err := rows.Scan(&member.ID, &member.Name, &member.LastKill, &member.LastDeath)
+		var memberID string
+		err := rows.Scan(&memberID)
 		if err != nil {
-			return members, err
+			return memberIDs, err
 		}
-		members = append(members, member)
+		memberIDs = append(memberIDs, memberID)
 	}
 
-	return members, rows.Err()
+	return memberIDs, rows.Err()
+}
+
+func GetMemberByID(db *sql.DB, ID string) (config.Member, error) {
+	var (
+		member config.Member
+	)
+
+	rows, err := db.Query("SELECT * FROM members WHERE id = ?", ID)
+	if err != nil {
+		return member, err
+	}
+
+	defer rows.Close()
+
+	if rows.Next() {
+		err = rows.Scan(&member.ID, &member.Name, &member.LastKill, &member.LastDeath)
+		if err != nil {
+			return member, err
+		}
+	} else {
+		return member, fmt.Errorf("no member found with ID: %s", ID)
+	}
+	return member, rows.Err()
 }
 
 func UpdateKillTime(db *sql.DB, kill config.Event) error {

@@ -47,8 +47,8 @@ func (s *Singleton) Shutdown() {
 }
 
 type Member struct {
-	ID        string
-	Name      string
-	LastKill  sql.NullTime
-	LastDeath sql.NullTime
+	ID        string       `db:"id"`
+	Name      string       `db:"name"`
+	LastKill  sql.NullTime `db:"last_kill"`
+	LastDeath sql.NullTime `db:"last_death"`
 }

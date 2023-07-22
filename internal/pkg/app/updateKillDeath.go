@@ -24,23 +24,32 @@ func FirstUpdate() {
 		sqlite = config.SingletonModel.GetDatabase()
 	)
 
-	members, err := db.GetMembers(sqlite)
-	if err != nil || len(members) == 0 {
+	memberIDs, err := db.GetAllMemberID(sqlite)
+	if err != nil || len(memberIDs) == 0 {
 		LogError(fmt.Errorf("Error get members from SQLite: %v", err))
 		return
 	}
 
-	for _, member := range members {
-		fmt.Println("Updating player: ", member.Name)
-
-		kills, err := api.GetKills(member.ID)
+	for _, memberID := range memberIDs {
+		// Get member from db
+		member, err := db.GetMemberByID(sqlite, memberID)
 		if err != nil {
-			LogError(fmt.Errorf("Error in get kill: %v", err))
+			fmt.Println("Error in get member from db: ", err)
 			return
 		}
-		if len(kills) > 0 {
-			kill := kills[0]
+		fmt.Println("Updating player: ", member.Name)
+
+		// Fetch kill data of player
+		// Process each kills reverse order & Save timestamp
+		kills, err := api.GetKills(memberID)
+		if err != nil {
+			fmt.Println("Error in get kill: ", err)
+			return
+		}
+		for i := len(kills) - 1; i >= 0; i-- {
+			kill := kills[i]
 			util.TruncateTime(&kill.TimeStamp)
+			// Null time or newer kill
 			if kill.TimeStamp.After(member.LastKill.Time) {
 				ProcessKillDeathEvent(kill)
 				db.UpdateKillTime(sqlite, kill)
@@ -49,16 +58,16 @@ func FirstUpdate() {
 			}
 		}
 
-		deaths, err := api.GetDeaths(member.ID)
+		deaths, err := api.GetDeaths(memberID)
 		if err != nil {
-			LogError(fmt.Errorf("Error in get death: %v", err))
+			fmt.Println("Error in get death: ", err)
 			return
 		}
-		if len(deaths) > 0 {
-			death := deaths[0]
+		for i := len(deaths) - 1; i >= 0; i-- {
+			death := deaths[i]
 			util.TruncateTime(&death.TimeStamp)
 			if death.TimeStamp.After(member.LastDeath.Time) {
-				ProcessKillDeathEvent(death)
+				ProcessKillDeathEvent(deaths[i])
 				db.UpdatDeathTime(sqlite, death)
 				// Update again time
 				member.LastDeath = sql.NullTime{Time: death.TimeStamp, Valid: true}
@@ -71,9 +80,9 @@ func FirstUpdate() {
 
 func UpdateKillDeath() {
 	var (
-		sqlite   = config.SingletonModel.GetDatabase()
-		ctx      = context.Background()
-		memberCh = make(chan config.Member)
+		sqlite     = config.SingletonModel.GetDatabase()
+		ctx        = context.Background()
+		memberIDCh = make(chan string)
 	)
 
 	fmt.Println("Updating kill board - ", time.Now().String())
@@ -92,13 +101,20 @@ func UpdateKillDeath() {
 				select {
 				case <-ctx.Done():
 					return
-				case member, ok := <-memberCh:
+				case memberID, ok := <-memberIDCh:
 					if !ok {
 						return
 					}
+					// Get member from db
+					member, err := db.GetMemberByID(sqlite, memberID)
+					if err != nil {
+						fmt.Println("Error in get member from db: ", err)
+						return
+					}
+
 					// Fetch kill data of player
 					// Process each kills reverse order & Save timestamp
-					kills, err := api.GetKills(member.ID)
+					kills, err := api.GetKills(memberID)
 					if err != nil {
 						fmt.Println("Error in get kill: ", err)
 						return
@@ -115,7 +131,7 @@ func UpdateKillDeath() {
 						}
 					}
 
-					deaths, err := api.GetDeaths(member.ID)
+					deaths, err := api.GetDeaths(memberID)
 					if err != nil {
 						fmt.Println("Error in get death: ", err)
 						return
@@ -136,19 +152,19 @@ func UpdateKillDeath() {
 	}
 
 	// Get members
-	members, err := db.GetMembers(sqlite)
-	if err != nil || len(members) == 0 {
+	memberIDs, err := db.GetAllMemberID(sqlite)
+	if err != nil || len(memberIDs) == 0 {
 		fmt.Println("Error get members from SQLite:", err)
 		return
 	}
 	eg, _ := errgroup.WithContext(ctx)
-	for idx := range members {
-		member := members[idx]
+	for idx := range memberIDs {
+		memberID := memberIDs[idx]
 		eg.Go(func() error {
-			memberCh <- member
+			memberIDCh <- memberID
 			return nil
 		})
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	}
 
 	wg.Wait()
