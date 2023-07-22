@@ -16,19 +16,43 @@ import (
 )
 
 var background image.Image
+var backgroundInven image.Image
+var inventory image.Image
 
 var bounds []image.Rectangle
 var fontBold font.Face
 var fontNormal font.Face
 
 func init() {
-	imgFile1, err := os.Open("assets/background-1.png")
+	imgFile1, err := os.Open("assets/background.png")
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	background, _, err = image.Decode(imgFile1)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	imgFile1, err = os.Open("assets/background-1.png")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	backgroundInven, _, err = image.Decode(imgFile1)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	imgFile1, err = os.Open("assets/inventory.png")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	inventory, _, err = image.Decode(imgFile1)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -67,6 +91,8 @@ func init() {
 		background.Bounds().Add(image.Point{925, 260}),
 		background.Bounds().Add(image.Point{925, 375}),
 		background.Bounds().Add(image.Point{925, 488}),
+		backgroundInven.Bounds(),
+		inventory.Bounds(),
 	}
 }
 
@@ -132,11 +158,36 @@ func HandleImage(event config.Event) (string, error) {
 			fmt.Println(event.Victim.GuildName)
 		}
 	}()
+	// size := bounds[0].Max.Add(image.Point{0, 150})
 
-	r := image.Rectangle{image.Point{0, 0}, bounds[0].Max}
-	rgba := image.NewRGBA(r)
+	// fmt.Println(event.Victim.Inventory[0])
 
-	draw.Draw(rgba, bounds[0], background, image.Point{0, 0}, draw.Src)
+	victimInventorySlot := 0
+	i := 0
+	for i = 0; i < len(event.Victim.Inventory); i++ {
+		if event.Victim.Inventory[i].Count == 0 {
+			break
+		}
+	}
+	if event.Victim.Inventory[i].Count != 0 {
+		victimInventorySlot = i + 1
+	} else {
+		victimInventorySlot = i
+	}
+
+	var r image.Rectangle
+	var rgba *image.RGBA
+
+	if victimInventorySlot > 0 {
+		r = image.Rectangle{image.Point{0, 0}, bounds[21].Max.Add(image.Point{0, 150 * int((victimInventorySlot-1)/9+1)})}
+		rgba = image.NewRGBA(r)
+		draw.Draw(rgba, bounds[21], backgroundInven, image.Point{0, 0}, draw.Src)
+	} else {
+		r = image.Rectangle{image.Point{0, 0}, bounds[0].Max}
+		rgba = image.NewRGBA(r)
+		draw.Draw(rgba, bounds[0], background, image.Point{0, 0}, draw.Src)
+	}
+
 	// Killer equipment
 	InsertItemImage(event.Killer.Equipment.MainHand, bounds[1], rgba)
 	InsertItemImage(event.Killer.Equipment.OffHand, bounds[2], rgba)
@@ -193,7 +244,14 @@ func HandleImage(event config.Event) (string, error) {
 	dc.SetRGB(0.25, 0.25, 0.25)
 	timeString := event.TimeStamp.Format("15:04 2006-01-02")
 	dc.DrawStringAnchored(timeString, 1250/2, 500, 0.5, 0.5)
-	// fmt.Println(event.Victim.Inventory)
+
+	dc.SetRGB(0, 0, 0)
+
+	// dc.DrawStringAnchored("Victim's Inventory", 1250/2, 680, 0.5, 0.5)
+
+	for i := 0; i <= int((victimInventorySlot-1)/9); i++ {
+		InsertLineInventory(rgba, dc, event.Victim.Inventory, i, victimInventorySlot)
+	}
 
 	imgPath := fmt.Sprintf("assets/image/%d.png", event.EventID)
 	err := dc.SavePNG(imgPath)
@@ -201,4 +259,30 @@ func HandleImage(event config.Event) (string, error) {
 		return "", err
 	}
 	return imgPath, nil
+}
+
+func InsertLineInventory(
+	rgba *image.RGBA,
+	dc *gg.Context,
+	inv []struct {
+		Type          string `json:"Type,omitempty"`
+		Count         int    `json:"Count,omitempty"`
+		Quality       int    `json:"Quality,omitempty"`
+		ActiveSpells  []any  `json:"ActiveSpells,omitempty"`
+		PassiveSpells []any  `json:"PassiveSpells,omitempty"`
+	},
+	line int,
+	count int,
+) {
+	dc.SetFontFace(fontNormal)
+	dc.SetRGB(1, 1, 1)
+	draw.Draw(rgba, image.Rectangle{image.Point{0, 700 + 150*line}, image.Point{1250, 700 + 150*(line+1)}}, inventory, image.Point{0, 0}, draw.Src)
+	start := line * 9
+	end := util.If((line+1)*9 < count, (line+1)*9, count)
+	for i := start; i < end; i++ {
+		x_start := 40 + 130*(i%9)
+		y_start := 711 + 150*line
+		InsertItemImage(inv[i], image.Rectangle{image.Point{x_start, y_start}, image.Point{1250, y_start + 150}}, rgba)
+		dc.DrawStringAnchored(strconv.Itoa(inv[i].Count), float64(x_start+98), float64(y_start+90), 0.5, 0.5)
+	}
 }

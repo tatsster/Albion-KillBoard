@@ -231,7 +231,14 @@ type Event struct {
 				PassiveSpells []any  `json:"PassiveSpells,omitempty"`
 			} `json:"Food,omitempty"`
 		} `json:"Equipment,omitempty"`
-		Inventory          []any   `json:"Inventory,omitempty"`
+		// Inventory          []any   `json:"Inventory,omitempty"`
+		Inventory []struct {
+			Type          string `json:"Type,omitempty"`
+			Count         int    `json:"Count,omitempty"`
+			Quality       int    `json:"Quality,omitempty"`
+			ActiveSpells  []any  `json:"ActiveSpells,omitempty"`
+			PassiveSpells []any  `json:"PassiveSpells,omitempty"`
+		} `json:"Inventory,omitempty"`
 		Name               string  `json:"Name,omitempty"`
 		ID                 string  `json:"Id,omitempty"`
 		GuildName          string  `json:"GuildName,omitempty"`
